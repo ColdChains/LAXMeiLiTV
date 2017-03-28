@@ -11,7 +11,7 @@ import UIKit
 class LAXNavigationController: UIViewController, LAXNavigationBarDelegate {
 
     lazy var laxNavigationBar: LAXNavigationBar? = {
-        let bar = LAXNavigationBar.init(frame: CGRect.init(x: 0, y: 0, width: ScreenWidth, height: 64), delegate: self)
+        let bar = LAXNavigationBar.init(frame: CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: 64), delegate: self)
         bar.backgroundColor = RedColor
         self.view.addSubview(bar)
         return bar
@@ -22,6 +22,20 @@ class LAXNavigationController: UIViewController, LAXNavigationBarDelegate {
         
         self.hideSystemBar()
         self.showNavigationBar()
+        //添加观察者
+        self.view.addObserver(self, forKeyPath: "frame", options: .new, context: nil)
+    }
+    
+    deinit {
+        removeObserver(self, forKeyPath: "frame")
+    }
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == "frame" {
+            if let rect = change?[.newKey] as? CGRect {
+                laxNavigationBar?.frame = CGRect.init(x: 0, y: -20, width: rect.size.width, height: 64)
+            }
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {

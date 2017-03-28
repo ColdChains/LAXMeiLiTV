@@ -16,12 +16,12 @@ class LiveViewController: LAXMenuBarController {
         let vc = UIViewController()
         let vc2 = UIViewController()
         let vc3 = UIViewController()
-        vc.view.backgroundColor = UIColor.lightText
+        vc.view.backgroundColor = UIColor.yellow
         vc2.view.backgroundColor = UIColor.green
         vc3.view.backgroundColor = UIColor.magenta
         
         self.viewControllers = [vc, vc2, vc3]
-        self.menuBar?.itemsName = ["精选", "哈哈哈哈哈哈", "游戏"]
+        self.laxMenuBar?.itemsName = ["精选", "哈哈哈哈哈哈", "游戏"]
 
     }
 

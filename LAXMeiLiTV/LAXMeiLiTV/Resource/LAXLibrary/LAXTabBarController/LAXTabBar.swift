@@ -14,6 +14,13 @@ protocol LAXTabBarDelegate {
 
 class LAXTabBar: UIView {
     
+    var size = UIScreen.main.bounds.size {
+        didSet {
+            self.frame = CGRect.init(x: 0, y: size.height - 49, width: size.width, height: 49)
+            setItemsFrame()
+        }
+    }
+    
     var items: Array<UIButton> = []
     
     var itemsName: Array<String> = [] {
@@ -27,15 +34,13 @@ class LAXTabBar: UIView {
     
     var itemsImage: Array<String> = [] {
         didSet {
-            setImage()
+            setItemsImage()
         }
     }
     
     var itemsSelectedImage:Array<String> = [] {
         didSet {
-            if selectedIndex < itemsImage.count && selectedIndex < items.count {
-                items[selectedIndex].setImage(UIImage.init(named: itemsSelectedImage[selectedIndex]), for: .normal)
-            }
+            setItemsSelectedImage()
         }
     }
     
@@ -43,27 +48,23 @@ class LAXTabBar: UIView {
         willSet {
             if items.count > selectedIndex {
                 items[selectedIndex].isSelected = false
-                if selectedIndex < itemsImage.count && selectedIndex < items.count {
-                    items[selectedIndex].setImage(UIImage.init(named: itemsImage[selectedIndex]), for: .normal)
-                }
             }
         }
         didSet {
             if items.count > selectedIndex {
                 items[selectedIndex].isSelected = true
-                if selectedIndex < itemsImage.count && selectedIndex < items.count {
-                    items[selectedIndex].setImage(UIImage.init(named: itemsSelectedImage[selectedIndex]), for: .normal)
-                }
             }
         }
     }
     
     init() {
-        super.init(frame: CGRect.init(x: 0, y: UIScreen.main.bounds.height - 49, width: UIScreen.main.bounds.width, height: 49))
+        super.init(frame: CGRect.init(x: 0, y: size.height, width: size.width, height: 49))
+        self.backgroundColor = UIColor.red
     }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        size = frame.size
     }
     
     convenience init(delegate: LAXTabBarDelegate) {
@@ -83,10 +84,10 @@ class LAXTabBar: UIView {
     }
     
     func addItems() {
-        let w = UIScreen.main.bounds.width / (CGFloat)(itemsName.count)
         for i in 0..<itemsName.count {
-            let btn = UIButton.init(frame: CGRect.init(x: (CGFloat)(i) * w, y: 0, width: w, height: 49))
+            let btn = UIButton.init()
             btn.tag = i
+            
             btn.setTitle(itemsName[i], for: .normal)
             btn.titleLabel?.font = UIFont.systemFont(ofSize: 14)
             btn.setTitleColor(UIColor.white, for: .normal)
@@ -95,27 +96,48 @@ class LAXTabBar: UIView {
             self.addSubview(btn)
             self.items.append(btn)
             
-            if i == 0 {
-                btn.isSelected = true
-            }
             if itemsName[i] == "" {
                 btn.isEnabled = false
             }
         }
+        setItemsFrame()
+        setItemsImage()
+        setItemsSelectedImage()
     }
     
-    private func setImage() {
-        for i in 0..<itemsName.count {
-            if i < itemsImage.count && i < items.count {
+    func setItemsFrame() {
+        let w = size.width / (CGFloat)(itemsName.count)
+        for i in 0..<items.count {
+            let btn = items[i]
+            btn.frame = CGRect.init(x: (CGFloat)(i) * w, y: 0, width: w, height: 49)
+            
+            if i == selectedIndex {
+                btn.isSelected = true
+            }
+        }
+    }
+    
+    func setItemsImage() {
+        for i in 0..<itemsImage.count {
+            if i < items.count {
                 items[i].setImage(UIImage.init(named: itemsImage[i]), for: .normal)
             }
-        }   
+        }
+    }
+    
+    func setItemsSelectedImage() {
+        for i in 0..<itemsSelectedImage.count {
+            if i < items.count {
+                items[i].setImage(UIImage.init(named: itemsSelectedImage[i]), for: .selected)
+            }
+        }
     }
     
     //tabBar Delegate
     var tabBarDelegate: LAXTabBarDelegate?
     
     func didselectItemAction(sender: UIButton) {
+        print("\ntabbar didselect index:", sender.tag)
         self.selectedIndex = sender.tag
         self.tabBarDelegate?.tabBarDidSelectItem(index: sender.tag)
     }

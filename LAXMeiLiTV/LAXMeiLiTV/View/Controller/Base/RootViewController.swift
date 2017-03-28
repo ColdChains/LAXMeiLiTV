@@ -8,7 +8,7 @@
 
 import UIKit
 
-class RootViewController: LAXTabBarPlusController, UITabBarControllerDelegate {
+class RootViewController: LAXTabBarPlusController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -16,6 +16,11 @@ class RootViewController: LAXTabBarPlusController, UITabBarControllerDelegate {
         self.navigationController?.navigationBar.isHidden = true
         self.addViewController()
         
+    }
+    
+    override func tabBarPlusDidSelectPlusButton(sender: UIButton) {
+        let vc = PlayerViewController()
+        self.present(vc, animated: true, completion: nil)
     }
     
     func addViewController() {
@@ -30,14 +35,12 @@ class RootViewController: LAXTabBarPlusController, UITabBarControllerDelegate {
         vc4.view.backgroundColor = OrangeColor
         self.viewControllers = [vc1, vc2, vc4, vc5]
         
-        self.tabBar?.itemsName = [TabBar_Title_1, TabBar_Title_2, TabBar_Title_4, TabBar_Title_5]
-        self.tabBar?.itemsImage = [TabBar_Image_1, TabBar_Image_2, TabBar_Image_4, TabBar_Image_5]
-        self.tabBar?.itemsSelectedImage = [TabBar_Image_Selected_1, TabBar_Image_Selected_2, TabBar_Image_Selected_4, TabBar_Image_Selected_5]
+        laxTabBarPlus?.itemsName = [TabBar_Title_1, TabBar_Title_2, TabBar_Title_4, TabBar_Title_5]
+        laxTabBarPlus?.itemsImage = [TabBar_Image_1, TabBar_Image_2, TabBar_Image_4, TabBar_Image_5]
+        laxTabBarPlus?.itemsSelectedImage = [TabBar_Image_Selected_1, TabBar_Image_Selected_2, TabBar_Image_Selected_4, TabBar_Image_Selected_5]
         
-        self.tabBar?.backgroundColor = RedColor
-        if let bar = self.tabBar as? LAXTabBarPlus {
-            bar.plusButtonImage = PlusButtonImage
-        }
+        laxTabBarPlus?.plusButtonImage = PlusButtonImage
+        laxTabBarPlus?.backgroundColor = RedColor
         
     }
     

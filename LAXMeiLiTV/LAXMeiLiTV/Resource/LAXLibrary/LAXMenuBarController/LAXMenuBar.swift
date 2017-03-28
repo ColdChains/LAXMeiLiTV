@@ -14,8 +14,16 @@ protocol LAXMenuBarDelegate {
 
 class LAXMenuBar: UIScrollView {
     
+    var width = UIScreen.main.bounds.width {
+        didSet {
+            self.frame = CGRect.init(x: 0, y: 0, width: width, height: 64)
+            menuView.frame = CGRect.init(x: 0, y: 20, width: width, height: 44)
+        }
+    }
+    
     var menuView = UIView.init(frame: CGRect.init(x: 0, y: 20, width: UIScreen.main.bounds.width, height: 44))
-    var lineView = LAXSplitLineView.init(color: UIColor.orange)
+    var lineView = LAXSplitLineView.init(color: UIColor.black)
+    
     var items: Array<UIButton> = []
     
     var itemsName: Array<String> = [] {
@@ -24,6 +32,23 @@ class LAXMenuBar: UIScrollView {
         }
         didSet {
             addItems()
+        }
+    }
+    
+    var titleColor: UIColor = UIColor.white {
+        didSet {
+            for item in items {
+                item.setTitleColor(titleColor, for: .normal)
+            }
+        }
+    }
+    
+    var titleSelectedColor: UIColor = UIColor.black {
+        didSet {
+            for item in items {
+                item.setTitleColor(titleColor, for: .selected)
+                lineView.lineColor = titleSelectedColor
+            }
         }
     }
     
@@ -38,13 +63,14 @@ class LAXMenuBar: UIScrollView {
                 items[selectedIndex].isSelected = true
                 var rect = lineView.frame
                 rect.origin.x = items[selectedIndex].frame.origin.x
+                rect.size.width = items[selectedIndex].frame.size.width
                 lineView.frame = rect
             }
         }
     }
     
     init() {
-        super.init(frame: CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 64))
+        super.init(frame: CGRect.init(x: 0, y: 0, width: width, height: 64))
         self.backgroundColor = UIColor.red
     }
     
@@ -68,7 +94,7 @@ class LAXMenuBar: UIScrollView {
     
     func addItems() {
         var x: CGFloat = 10
-        menuView = UIView.init(frame: CGRect.init(x: 0, y: 20, width: UIScreen.main.bounds.width, height: 44))
+        menuView = UIView.init(frame: CGRect.init(x: 0, y: 20, width: width, height: 44))
         for i in 0..<itemsName.count {
             let btn = UIButton.init()
             let w = itemsName[i].widthWithConstrainedWidth(width: 200, font: btn.titleLabel!.font)
@@ -77,8 +103,8 @@ class LAXMenuBar: UIScrollView {
             
             btn.tag = i
             btn.setTitle(itemsName[i], for: .normal)
-            btn.setTitleColor(UIColor.white, for: .normal)
-            btn.setTitleColor(UIColor.orange, for: .selected)
+            btn.setTitleColor(titleColor, for: .normal)
+            btn.setTitleColor(titleSelectedColor, for: .selected)
             btn.addTarget(self, action: #selector(didselectItemAction(sender:)), for: .touchUpInside)
             menuView.addSubview(btn)
             self.items.append(btn)
@@ -96,6 +122,7 @@ class LAXMenuBar: UIScrollView {
     var menuBarDelegate: LAXMenuBarDelegate?
     
     func didselectItemAction(sender: UIButton) {
+        print("\ntabbar didselect index:", sender.tag)
         selectedIndex = sender.tag
         lineView.x = self.items[sender.tag].frame.origin.x
         lineView.width = self.items[sender.tag].frame.size.width

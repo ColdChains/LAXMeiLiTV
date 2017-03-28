@@ -14,12 +14,17 @@ protocol LAXMeViewControllerDelegate {
 
 class LAXMeViewController: UITableViewController, LAXMeViewControllerDelegate {
     
-    let cellId = "cell"
-    var imageHeight: CGFloat = ScreenWidth / 16 * 9
+    private let cellId = "cell"
+    private var imageHeight: CGFloat = UIScreen.main.bounds.width / 16 * 9 { // 按照图片比例设置高度
+        didSet {
+            self.tableView.contentInset = UIEdgeInsetsMake(imageHeight, 0, 49, 0);
+            self.setSubViewsFrame()
+        }
+    }
     
-    var zoomImageView: UIImageView!
-    var headImageView: UIImageView!
-    var nickNameLabel: UILabel!
+    var zoomImageView = UIImageView.init()
+    var headImageView = UIImageView.init()
+    var nickNameLabel = UILabel.init()
     
     var dataArr: [[String]] = [[""], [""]]
     var nameArr: [[String]] = [[""], [""]]
@@ -38,24 +43,52 @@ class LAXMeViewController: UITableViewController, LAXMeViewControllerDelegate {
         self.tableView.tableFooterView = UIView.init()
         
         self.createView()
-        
+        self.setSubViewsFrame()
+        //添加观察者
+        self.view.addObserver(self, forKeyPath: "frame", options: .new, context: nil)
+    }
+    
+    deinit {
+        removeObserver(self, forKeyPath: "frame")
+    }
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        //屏幕旋转 重新设置frame
+        if keyPath == "frame" {
+            if let rect = change?[.newKey] as? CGRect {
+                if rect.size.width < rect.size.height {
+                    //屏幕纵向
+                    imageHeight = rect.size.width / 16 * 9
+                    zoomImageView.image = UIImage.init(named: "topback")
+                } else {
+                    //屏幕横向
+                    imageHeight = rect.size.width / 5 * 1
+                    zoomImageView.image = UIImage.init(named: "topback2")
+                }
+            }
+        }
+    }
+    
+    func setSubViewsFrame() {
+        zoomImageView.frame = CGRect.init(x: 0, y: 0 - imageHeight, width: self.view.frame.width, height: imageHeight)
+        headImageView.frame = CGRect.init(x: 20, y: imageHeight - 100, width: 80, height: 80)
+        headImageView.layer.cornerRadius = 40
+        nickNameLabel.frame = CGRect.init(x: 120, y: imageHeight - 70, width: 170, height: 30)
     }
     
     func createView() {
         
         zoomImageView = UIImageView.init(image: UIImage.init(named: TopBackgroundImage))
-        zoomImageView.frame = CGRect.init(x: 0, y: 0 - imageHeight, width: self.view.frame.width, height: imageHeight)
         zoomImageView.contentMode = .scaleAspectFill //高度改变宽度也跟着改变（不设置那将只会被纵向拉伸）
         zoomImageView.clipsToBounds = true;
         self.view.addSubview(zoomImageView)
         
-        headImageView = UIImageView.init(frame: CGRect.init(x: 20, y: imageHeight - 100, width: 80, height: 80))
+        headImageView = UIImageView.init()
         headImageView.image = UIImage.init(named: HeadImage)
-        headImageView.layer.cornerRadius = 40
         headImageView.clipsToBounds = true
         zoomImageView.addSubview(headImageView)
         
-        nickNameLabel = UILabel.init(frame: CGRect.init(x: 120, y: imageHeight - 70, width: 170, height: 30))
+        nickNameLabel = UILabel.init()
         nickNameLabel.text = "未登录"
         nickNameLabel.font = UIFont.systemFont(ofSize: 20)
         nickNameLabel.textColor = UIColor.white
